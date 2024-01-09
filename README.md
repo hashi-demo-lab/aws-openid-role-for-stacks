@@ -1,0 +1,1 @@
+# aws-openid-role-for-stacks

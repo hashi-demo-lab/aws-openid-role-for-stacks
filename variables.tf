@@ -23,9 +23,14 @@ variable "organization_id" {
   }
 }
 
-variable "organization_name" {
-  description = "Terraform Cloud organization name"
-  type        = string
+variable "organization_names" {
+  description = "List of Terraform Cloud organization names"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.organization_names) > 0
+    error_message = "At least one organization name is required."
+  }
 }
 
 variable "allowed_actions" {

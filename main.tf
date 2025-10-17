@@ -1,5 +1,5 @@
 locals {
-  development_stack_subjects = ["organization:${var.organization_name}:*"]
+  development_stack_subjects = [for org in var.organization_names : "organization:${org}:*"]
   jwt_audience               = "terraform-stacks-private-preview"
 }
 

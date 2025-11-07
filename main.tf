@@ -1,6 +1,7 @@
 locals {
   development_stack_subjects = [for org in var.organization_names : "organization:${org}:*"]
-  jwt_audience               = "aws.workload.identity"
+  #jwt_audience               = "aws.workload.identity"
+  jwt_audience               = "terraform-stacks-private-preview"
 }
 
 # Terraform Cloud production OpenID provider.

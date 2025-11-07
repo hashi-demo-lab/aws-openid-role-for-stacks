@@ -1,19 +1,28 @@
 locals {
-  development_stack_subjects = [for org in var.organization_names : "organization:${org}:*"]
-  #jwt_audience               = "aws.workload.identity"
-  jwt_audience               = "terraform-stacks-private-preview"
+  jwt_audiences = [
+    "aws.workload.identity",
+    "terraform-stacks-private-preview"
+  ]
+  
+  organization_subjects = [
+    for org in var.organization_names : "organization:${org}:*"
+  ]
 }
 
-# Terraform Cloud production OpenID provider.
+# Terraform Cloud OpenID provider supporting multiple audiences.
 resource "aws_iam_openid_connect_provider" "stacks" {
   url = "https://app.terraform.io"
 
-  client_id_list  = [local.jwt_audience]
+  client_id_list  = local.jwt_audiences
   thumbprint_list = ["9E99A48A9960B14926BB7F3B02E22DA2B0AB7280"]
+  
+  tags = {
+    "Source" = "aws-openid-role-for-stacks"
+  }
 }
 
 # This role is assumed by Terraform Cloud dynamic credentials, accepting any
-# stack that matches the subject string in local.development_stack_subjects.
+# stack that matches the subject string from multiple organizations and audiences.
 resource "aws_iam_role" "stacks" {
   name = var.role_name
   assume_role_policy = jsonencode({
@@ -27,10 +36,10 @@ resource "aws_iam_role" "stacks" {
         },
         "Condition" : {
           "StringEquals" : {
-            "app.terraform.io:aud" : local.jwt_audience,
+            "app.terraform.io:aud" : local.jwt_audiences,
           },
           "StringLike" : {
-            "app.terraform.io:sub" : local.development_stack_subjects,
+            "app.terraform.io:sub" : local.organization_subjects,
           },
         },
       },
@@ -64,5 +73,21 @@ resource "aws_iam_role_policy" "stacks" {
 
 # Emit the role ARN, for use in the stack configuration.
 output "role_arn" {
-  value = aws_iam_role.stacks.arn
+  description = "ARN of the IAM role for Terraform Stacks"
+  value       = aws_iam_role.stacks.arn
+}
+
+output "openid_provider_arn" {
+  description = "ARN of the OpenID Connect provider"
+  value       = aws_iam_openid_connect_provider.stacks.arn
+}
+
+output "supported_audiences" {
+  description = "List of supported JWT audiences"
+  value       = local.jwt_audiences
+}
+
+output "supported_organizations" {
+  description = "List of organization subjects that can assume this role"
+  value       = local.organization_subjects
 }

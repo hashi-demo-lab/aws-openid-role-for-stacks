@@ -1,7 +1,11 @@
 locals {
   jwt_audiences = [
     "aws.workload.identity",
-    "terraform-stacks-private-preview"
+    "terraform-stacks-private-preview",
+    "platform.onboarding",
+    "finance-team-*",
+    "engineering-team-*",
+    "sales-team-*",
   ]
   
   organization_subjects = [

@@ -3,9 +3,7 @@ locals {
     "aws.workload.identity",
     "terraform-stacks-private-preview",
     "platform.onboarding",
-    "finance-team-*",
     "engineering-team-*",
-    "sales-team-*",
   ]
   
   organization_subjects = [
